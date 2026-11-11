@@ -1,0 +1,40 @@
+name: Publicar en el VPS
+
+# Cada push a main sube la carpeta public/ a https://pruebascharlee.exblake.com
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # botón "Run workflow" en GitHub para publicar a mano
+
+# Si haces dos push seguidos, se publica uno después del otro (nunca a la vez)
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sitio de HTML plano: no hay build, se publica public/ tal cual.
+      # Si algún día se agrega Vite/npm: añadir aquí actions/setup-node@v4 (node 22, cache npm),
+      # "npm ci" y "npm run build", y cambiar public/ por dist/ en el paso "Subir al servidor".
+
+      - name: Preparar la llave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # --delete-after borra del servidor lo que ya no está en public/
+      - name: Subir al servidor
+        run: |
+          rsync -az --delete-after --delay-updates \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            public/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/htdocs/pruebascharlee.exblake.com/"
+
+      - name: Comprobar que el sitio responde
+        run: curl -fsS -o /dev/null -w "HTTP %{http_code}\n" https://pruebascharlee.exblake.com/
