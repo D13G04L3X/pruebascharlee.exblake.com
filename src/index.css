@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bone: #ede6d6;
+  --color-ink: #2a2725;
+  --color-leaf: #3fa85b;
+
+  --font-sans: "Montserrat Variable", "Montserrat", Arial, sans-serif;
+  --font-display: var(--font-sans);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-marquee: marquee 20s linear infinite;
+  @keyframes marquee {
+    to { transform: translateX(-33.333%); }
+  }
+}
+
+html {
+  background: var(--color-bone);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  scroll-padding-top: 1rem;
+}
+
+body { overflow-x: clip; }
+
+::selection { background: var(--color-ink); color: var(--color-bone); }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@layer components {
+  /* Etiqueta pequeña en mayúsculas (eyebrows, contadores, tags) */
+  .label {
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  /* Banco de nubes: círculos del color actual, fundidos con blur */
+  .cloud {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    filter: blur(calc(1.4vw + 12px));
+    will-change: transform, opacity;
+  }
+  .cloud i {
+    position: absolute;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+
+  /* Grano sutil sobre los placeholders */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}
