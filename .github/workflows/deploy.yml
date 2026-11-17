@@ -1,6 +1,6 @@
 name: Publicar en el VPS
 
-# Cada push a main sube la carpeta public/ a https://pruebascharlee.exblake.com
+# Cada push a main genera el sitio (Vite) y lo sube a https://pruebascharlee.exblake.com
 on:
   push:
     branches: [main]
@@ -11,32 +11,76 @@ concurrency:
   group: publicar
   cancel-in-progress: false
 
+env:
+  DOMINIO: pruebascharlee.exblake.com
+  SALIDA: dist # carpeta que genera "npm run build" (Vite). public/ son solo imágenes y videos.
+
 jobs:
   publicar:
     # Este código también se sube a ExBlake/The-Charlee-Hotel-WebSite; allí NO debe publicar.
     if: github.repository == 'D13G04L3X/pruebascharlee.exblake.com'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      # Sitio de HTML plano: no hay build, se publica public/ tal cual.
-      # Si algún día se agrega Vite/npm: añadir aquí actions/setup-node@v4 (node 22, cache npm),
-      # "npm ci" y "npm run build", y cambiar public/ por dist/ en el paso "Subir al servidor".
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Si package-lock.json no coincide con package.json, se detiene aquí (corre "npm install" y sube el lock)
+      - name: Instalar dependencias
+        run: npm ci --no-audit --no-fund
+
+      # Imágenes/videos que el código usa pero no existen (o difieren en mayúsculas: en Windows funciona, en el servidor no)
+      - name: Revisar imágenes y videos
+        run: npm run revisar
+
+      - name: Generar el sitio
+        run: npm run build
+
+      # Nada se sube si el build no dejó un sitio completo: rsync --delete borraría el sitio que funciona
+      - name: Revisar el sitio generado antes de subirlo
+        run: |
+          set -e
+          f="$SALIDA/index.html"
+          [ -f "$f" ] || { echo "::error::No existe $f. ¿Cambió la carpeta de salida del build?"; exit 1; }
+          grep -q 'id="root"' "$f" || { echo "::error::$f no parece la página de la app (falta id=\"root\")."; exit 1; }
+          if grep -q '/src/main' "$f"; then echo "::error::$f apunta a /src/main.jsx: no es el resultado del build."; exit 1; fi
+          for a in $(grep -oE '/assets/[^"]+\.(js|css)' "$f"); do
+            [ -f "$SALIDA$a" ] || { echo "::error::Falta $SALIDA$a"; exit 1; }
+          done
+          [ -f "$SALIDA/robots.txt" ] || { echo "::error::Falta robots.txt (va en public/robots.txt)."; exit 1; }
+          echo "Sitio generado OK: $(find "$SALIDA" -type f | wc -l) archivos, $(du -sh "$SALIDA" | cut -f1)"
 
       - name: Preparar la llave SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
         run: |
+          [ -n "$VPS_SSH_KEY" ] && [ -n "$VPS_KNOWN_HOSTS" ] || { echo "::error::Faltan los secretos VPS_SSH_KEY / VPS_KNOWN_HOSTS en Settings → Secrets and variables → Actions."; exit 1; }
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
-      # --delete-after borra del servidor lo que ya no está en public/
+      # --delete-after borra del servidor lo que ya no existe en el sitio; --delay-updates cambia todo al final, de golpe.
+      # --chmod: permisos de lectura correctos aunque el archivo venga raro desde Windows.
       - name: Subir al servidor
         run: |
-          rsync -az --delete-after --delay-updates \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
-            public/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/htdocs/pruebascharlee.exblake.com/"
+          rsync -az --delete-after --delay-updates --chmod=D755,F644 \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o ConnectTimeout=20" \
+            "$SALIDA/" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/htdocs/$DOMINIO/"
 
+      # Comprueba lo que ve un visitante: portada, una ruta interna (necesita el ajuste del Vhost), el JS y el CSS
       - name: Comprobar que el sitio responde
-        run: curl -fsS -o /dev/null -w "HTTP %{http_code}\n" https://pruebascharlee.exblake.com/
+        run: |
+          set -e
+          url="https://$DOMINIO"
+          revisar() { curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -o /dev/null -w "  %{http_code}  $1\n" "$url$1" \
+                        || { echo "::error::$url$1 no responde bien. $2"; exit 1; }; }
+          revisar /             "La portada no carga."
+          revisar /habitaciones "Las rutas internas dan error: revisa en CloudPanel → Vhost el bloque 'location / { try_files ... /index.html; }'."
+          revisar /robots.txt   ""
+          for a in $(curl -fsS "$url/" | grep -oE '/assets/[^"]+\.(js|css)'); do revisar "$a" "La página quedó a medias (falta el JS/CSS)."; done
