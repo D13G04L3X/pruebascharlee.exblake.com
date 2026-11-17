@@ -24,7 +24,7 @@ function Menu({ onClose }) {
   const shown = hover ?? 0
 
   return (
-    <motion.div id="site-menu" className="fixed inset-0 z-40" initial="closed" animate="open" exit="closed">
+    <motion.div id="site-menu" className="fixed inset-0 z-[45]" initial="closed" animate="open" exit="closed">
       <motion.div className="absolute inset-0 bg-bone" variants={layer(0, 0.12)} />
       <motion.div className="absolute inset-0 overflow-hidden bg-ink text-bone" variants={layer(0.12, 0)}>
         <div className="grid h-full lg:grid-cols-[1.05fr_1fr]">
@@ -147,8 +147,9 @@ export default function Nav({ ready }) {
         transition={{ duration: 0.8, delay: 0.3 }}
       >
         <div className="flex items-start justify-between">
-          <SiteLink href="/" className="pointer-events-auto text-xl font-medium leading-none" aria-label="The Charlee, inicio">
-            {brand}
+          <SiteLink href="/" className="pointer-events-auto block leading-none" aria-label="The Charlee, inicio">
+            {/* Logo en blanco: el nav usa mix-blend-difference para verse sobre fondos claros y oscuros */}
+            <img src="/images/logos/charlee-header.svg" alt={brand} className="block h-5 w-auto brightness-0 invert md:h-6" />
           </SiteLink>
           <button
             type="button"

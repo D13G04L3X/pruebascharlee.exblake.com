@@ -53,7 +53,7 @@ function RoomCard({ room, i, total }) {
 
           <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-8 lg:p-10">
             <div className="flex items-start justify-between pt-8 text-[11px] uppercase tracking-[0.18em] lg:pt-6">
-              <span>{room.kicker}</span>
+              <span />
               <span className="tabular-nums">
                 {pad(i + 1)} <span className="opacity-50">/ {pad(total)}</span>
               </span>
@@ -110,7 +110,6 @@ export default function Rooms({ ready }) {
           <span className="text-[11px] uppercase tracking-[0.18em]">
             {pad(rooms.length)} habitaciones · Desliza ↓
           </span>
-          <p className="max-w-md text-sm leading-[1.4] tracking-[-0.01em] lg:text-lg">{roomsPage.intro}</p>
         </motion.div>
       </header>
 

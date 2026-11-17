@@ -60,8 +60,8 @@ export default function Footer() {
       >
         <div className="flex items-start justify-between gap-8 text-xs uppercase tracking-[0.12em] md:text-sm">
           <Rev>
-            <SiteLink href="/" className="block font-semibold tracking-[0.08em]">
-              The / Charlee
+            <SiteLink href="/" className="block" aria-label="The Charlee, inicio">
+              <img src="/images/logos/charlee-footer.svg" alt="The Charlee, a joyful stay" className="block h-10 w-auto md:h-14" />
             </SiteLink>
           </Rev>
           <Rev wrap="hidden overflow-hidden md:block" className="text-right">
@@ -90,7 +90,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-4 text-xs uppercase tracking-[0.12em] lg:flex-row lg:items-center lg:justify-between lg:text-sm">
           <div className="flex flex-col gap-1.5">
-            <Rev>© The / Charlee {new Date().getFullYear()}</Rev>
+            <Rev>© The Charlee {new Date().getFullYear()}</Rev>
             <Rev className="text-[10px] text-ink/55 md:text-[11px]">{footer.address}</Rev>
           </div>
           <Rev wrap="-m-2 overflow-hidden p-2" className="flex items-center gap-2.5 py-1 text-[11px] text-ink/70 lg:py-0">

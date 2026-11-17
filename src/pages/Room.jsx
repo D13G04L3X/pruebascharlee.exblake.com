@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform } from 'framer-motion'
-import { booking, brand, rooms, roomsPage } from '../content'
+import { booking, brand, roomGeneral, roomNotes, rooms, roomsPage } from '../content'
 import Footer from '../components/Footer'
 import Lightbox from '../components/Lightbox'
 import {
@@ -321,11 +321,9 @@ function RoomInfo({ room }) {
 
       <div className="mt-20 grid grid-cols-12 gap-x-6 gap-y-8 lg:mt-32">
         <div className="col-span-12 lg:col-span-4">
-          <span className="label tracking-[0.24em] lg:text-xs">Incluye</span>
+          <span className="label tracking-[0.24em] lg:text-xs">{roomGeneral.eyebrow}</span>
           <FadeUp as="h2" className="mt-5 text-[clamp(2rem,8.5vw,3.25rem)] font-medium leading-[1] tracking-[-0.05em] lg:text-[3.6vw]">
-            Pensada hasta
-            <br />
-            el último detalle.
+            {roomGeneral.title}
           </FadeUp>
         </div>
         <ul className="col-span-12 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8 lg:col-span-7 lg:col-start-6">
@@ -338,6 +336,28 @@ function RoomInfo({ room }) {
             >
               <span className="text-[10px] tabular-nums tracking-[0.16em] text-ink/50">{pad(i + 1)}</span>
               {a}
+            </FadeUp>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-20 grid grid-cols-12 gap-x-6 gap-y-8 lg:mt-32">
+        <div className="col-span-12 lg:col-span-4">
+          <span className="label tracking-[0.24em] lg:text-xs">{roomNotes.eyebrow}</span>
+          <FadeUp as="h2" className="mt-5 text-[clamp(2rem,8.5vw,3.25rem)] font-medium leading-[1] tracking-[-0.05em] lg:text-[3.6vw]">
+            {roomNotes.title}
+          </FadeUp>
+        </div>
+        <ul className="col-span-12 lg:col-span-7 lg:col-start-6">
+          {roomNotes.items.map((n, i) => (
+            <FadeUp
+              as="li"
+              key={i}
+              delay={i * 0.06}
+              className="flex items-baseline gap-4 border-t border-ink/20 py-4 text-sm leading-[1.5] tracking-[-0.01em] last:border-b lg:text-lg lg:leading-[1.4]"
+            >
+              <span className="text-[10px] tabular-nums tracking-[0.16em] text-ink/50">{pad(i + 1)}</span>
+              <span>{n}</span>
             </FadeUp>
           ))}
         </ul>
@@ -360,7 +380,7 @@ function RoomBook({ room, innerRef }) {
         className="relative flex h-full w-full flex-col justify-between overflow-hidden rounded-[28px] bg-ink p-5 text-white md:rounded-[36px] md:p-8 lg:p-10"
       >
         <div className="relative z-10 flex items-start justify-between gap-6 pt-8 text-[11px] uppercase tracking-[0.18em] lg:pt-4">
-          <span>Tu estadía</span>
+          <span />
           <span className="text-right text-white/60">{room.meta.slice(0, 2).join(' · ')}</span>
         </div>
 
@@ -378,7 +398,7 @@ function RoomBook({ room, innerRef }) {
 
         <div className="relative z-10 flex flex-col items-center text-center">
           <FadeUp as="h2" className="max-w-[16ch] text-balance text-[clamp(2.2rem,9.5vw,4.5rem)] font-medium leading-[0.98] tracking-[-0.05em] lg:text-[5.6vw]">
-            {room.name} te espera.
+            {room.name}
           </FadeUp>
           <FadeUp delay={0.15} className="mt-8 lg:mt-10">
             <Magnetic>
@@ -398,7 +418,7 @@ function RoomBook({ room, innerRef }) {
 
         <div className="relative z-10 flex items-end justify-between gap-6 text-[11px] uppercase tracking-[0.18em]">
           <span>{brand}</span>
-          <span className="text-right text-white/60">Parque Lleras · Medellín</span>
+          <span className="text-right text-white/60">El Poblado · Medellín</span>
         </div>
       </motion.div>
     </section>
@@ -437,7 +457,7 @@ function RoomSlide({ room, i, total, wasDragged }) {
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/25" />
         <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-5 text-[11px] uppercase tracking-[0.18em] text-white md:p-7">
-          <span>{room.kicker}</span>
+          <span />
           <span className="tabular-nums">
             {pad(i + 1)} <span className="opacity-50">/ {pad(total)}</span>
           </span>
@@ -585,16 +605,16 @@ function OtherRooms({ current }) {
   )
 }
 
-/* Barra flotante de reserva: visible mientras se lee la información, hasta el bloque de reserva. */
-function BookBar({ room, until }) {
+/* Barra flotante de reserva: visible en toda la página una vez se deja atrás el banner. */
+function BookBar({ room }) {
   const [show, setShow] = useState(false)
   const { scrollY } = useScroll()
   useMotionValueEvent(scrollY, 'change', (y) => {
+    // El banner es sticky: se mide la sección que viene después y sube por encima de él.
     const vh = window.innerHeight
-    const end = until.current ? until.current.getBoundingClientRect().top + y - vh * 0.6 : Infinity
-    const info = document.getElementById('info')
-    const start = info ? info.getBoundingClientRect().top + y - vh * 0.5 : vh
-    setShow(y > start && y < end)
+    const next = document.querySelector('main#top > :nth-child(2)')
+    const start = next ? next.getBoundingClientRect().top + y - vh * 0.3 : vh * 0.7
+    setShow(y > start)
   })
   return (
     <motion.div
@@ -633,7 +653,7 @@ export default function Room({ slug, ready }) {
       <RoomBook room={room} innerRef={bookRef} />
       <OtherRooms current={room} />
       <Footer />
-      <BookBar room={room} until={bookRef} />
+      <BookBar room={room} />
     </main>
   )
 }
