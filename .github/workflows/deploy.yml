@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   publicar:
+    # Este código también se sube a ExBlake/The-Charlee-Hotel-WebSite; allí NO debe publicar.
+    if: github.repository == 'D13G04L3X/pruebascharlee.exblake.com'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
