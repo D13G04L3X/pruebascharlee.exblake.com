@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { motion, useInView, useMotionValueEvent, useScroll } from 'framer-motion'
 import { features } from '../content'
-import { EASE, INOUT, Img, Mask, pad, useIsDesktop } from './ui'
+import { EASE, INOUT, Img, Mask, Roll, SiteLink, pad, useIsDesktop } from './ui'
 
 // Colores y lado de la foto de cada panel
 const LOOK = [
@@ -83,7 +83,17 @@ export default function Slides({ items = features, id = 'detalle', dark = false 
                         {pad(n)}
                       </span>
                     </div>
-                    <p className="max-w-[22rem] text-xs leading-[1.4] tracking-[-0.01em] md:text-base">{f.text}</p>
+                    <div className="max-w-[22rem]">
+                      <p className="text-xs leading-[1.4] tracking-[-0.01em] md:text-base">{f.text}</p>
+                      {f.cta && (
+                        <SiteLink
+                          href={f.cta.href}
+                          className="group mt-4 inline-block rounded-full border border-current px-5 py-2.5 text-[10px] uppercase tracking-[0.18em] transition-opacity hover:opacity-70 md:mt-5 md:text-[11px]"
+                        >
+                          <Roll>{f.cta.label} →</Roll>
+                        </SiteLink>
+                      )}
+                    </div>
                   </motion.div>
                 </motion.div>
               </div>

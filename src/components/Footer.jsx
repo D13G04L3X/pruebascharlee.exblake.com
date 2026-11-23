@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { booking, footer, nav } from '../content'
+import { onlyEnabled } from '../site'
 import { Chevron, EASE, INOUT, Img, Roll, SiteLink } from './ui'
 
 /* Footer en una tarjeta oscura con profundidad:
@@ -37,7 +38,7 @@ function Rev({ children, className = '', wrap = 'overflow-hidden' }) {
 const Rule = ({ className = '' }) => <motion.div variants={rule} className={`h-px origin-left bg-bone/15 ${className}`} />
 
 // Páginas del menú (sin "Contacto", que es este mismo footer)
-const pages = nav.filter((l) => l.href !== '#contacto')
+const pages = onlyEnabled(nav).filter((l) => l.href !== '#contacto')
 
 const icons = {
   Instagram: (

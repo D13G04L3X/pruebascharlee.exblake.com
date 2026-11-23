@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { HOME, isEnabled } from '../site'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import imagenes from '../imagenes.json' // índice de versiones optimizadas (lo genera "npm run imagenes")
 
@@ -203,12 +204,29 @@ const EVERYWHERE = ['#top', '#contacto']
 
 /* Enlace del sitio: rutas internas con el router; las anclas (#hotel…) llevan
    a la página de inicio cuando se está en otra página. */
-export function SiteLink({ href, children, ...rest }) {
+export function SiteLink({ href, children, onClick, ...rest }) {
   const { pathname } = useLocation()
-  if (href.startsWith('/')) return <Link to={href} {...rest}>{children}</Link>
-  if (href.startsWith('#') && pathname !== '/' && !EVERYWHERE.includes(href))
-    return <Link to={`/${href}`} {...rest}>{children}</Link>
-  return <a href={href} {...rest}>{children}</a>
+  // Ruta de una página desactivada (p. ej. el inicio): lleva a la página principal activa
+  if (href.startsWith('/')) return <Link to={isEnabled(href) ? href : HOME} onClick={onClick} {...rest}>{children}</Link>
+  // Ancla de otra página (las del inicio): solo si esa ancla no existe aquí y el inicio está activo
+  if (href.startsWith('#') && pathname !== '/' && !EVERYWHERE.includes(href) && isEnabled('/')) {
+    return (
+      <Link
+        to={`/${href}`}
+        onClick={(e) => {
+          if (document.querySelector(href)) {
+            e.preventDefault()
+            document.querySelector(href).scrollIntoView()
+          }
+          onClick?.(e)
+        }}
+        {...rest}
+      >
+        {children}
+      </Link>
+    )
+  }
+  return <a href={href} onClick={onClick} {...rest}>{children}</a>
 }
 
 /* Aparece subiendo al entrar en pantalla */

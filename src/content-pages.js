@@ -9,42 +9,65 @@ const pg = (name, alt) => ({ src: img(`pages/${name}`), alt })
 export const restaurant = {
   name: 'Real Eatery',
   hero: {
+    layout: 'cabecera', // portada con el nombre enorme abajo (ver MastheadHero)
     image: img('pages/resto-1'),
     video: '/videos/restaurante.mp4',
-    eyebrow: 'Restaurante',
+    eyebrow: 'Restaurante · The Charlee',
     title: ['Real', 'Eatery.'],
     ctas: [
-      { label: 'Reservar mesa', href: '#reservar' },
-      { label: 'Ver la carta', href: '#carta' },
+      { label: 'Reservar una mesa', href: '#contacto' },
+      { label: 'Ver el menú', href: '#carta' },
     ],
     meta: ['Cocina de origen', 'Desayuno · Almuerzo · Cena', 'Piso 1', 'Abierto al público'],
     tagline: ['Producto local, fuego lento', 'y una mesa sin afán.'],
   },
+  // Textos oficiales de Real Eatery (tomados del sitio actual)
   statement: {
-    eyebrow: 'El restaurante',
-    text: 'Cocina honesta con producto colombiano, pensada para compartir y quedarse en la mesa.',
-    body: 'En Real Eatery el menú cambia con la temporada y con lo que llega de las fincas cercanas. Desayunos largos, almuerzos de barrio y cenas que empiezan con un coctel.',
+    eyebrow: 'Real Eatery · Una gran experiencia',
+    text: 'REAL es un verdadero destino culinario en el corazón de El Poblado.',
+    body: [
+      'Nuestra cocina internacional con esencia local es el principal pilar de las recetas, donde los sabores del mundo se fusionan con ingredientes frescos y autóctonos de Colombia.',
+      'Aquí, el ambiente es contemporáneo y acogedor, ideal para disfrutar desde un desayuno saludable hasta una cena especial.',
+      'Además de la oferta gastronómica, en Real Eatery nos destacamos por la carta de cocteles de autor, SAMSARA, una experiencia gastronómica innovadora, consciente y REAL.',
+    ],
     rows: [
-      { label: 'Desayuno', value: '6:30 – 11:00' },
-      { label: 'Almuerzo', value: '12:00 – 16:00' },
-      { label: 'Cena', value: '18:30 – 23:00' },
-      { label: 'Reservas', value: 'Recomendadas' },
+      { label: 'Correo', value: 'info@thecharlee.com', href: 'mailto:info@thecharlee.com' },
+      { label: 'Teléfono', value: '+57 316 2445492', href: 'tel:+573162445492' },
+      { label: 'Instagram', value: '@real.eatery', href: 'https://www.instagram.com/real.eatery/' },
+    ],
+    actions: [
+      { label: 'Reservar una mesa', href: '#contacto' },
+      { label: 'Ver el menú', href: '#carta' },
     ],
   },
   panels: [
     {
-      title: 'Del campo a la mesa.',
-      text: 'Trabajamos con productores de Antioquia: verduras del oriente, café de origen y pesca que llega fresca cada semana.',
+      title: 'Cocina global, ingredientes locales',
+      text: 'Nuestra cocina internacional con esencia local es el principal pilar de las recetas, donde los sabores del mundo se fusionan con ingredientes frescos y autóctonos de Colombia.',
       src: img('pages/resto-8'),
       alt: 'Cocina de Real Eatery',
+      cta: { label: 'Reservar una mesa', href: '#contacto' },
     },
     {
-      title: 'Una barra para empezar la noche.',
-      text: 'Cocteles de autor, vinos por copa y una selección de destilados colombianos para abrir o cerrar la cena.',
-      src: img('pages/resto-3'),
-      alt: 'El salón de noche',
+      title: 'Menú Ultra',
+      text: 'Una propuesta creada para acompañar tu entrenamiento: ingredientes conscientes, balance real y bienestar en cada plato.',
+      src: img('pages/resto-6'),
+      alt: 'Plato del Menú Ultra',
+      cta: { label: 'Reservar una mesa', href: '#contacto' },
     },
   ],
+  music: {
+    image: pg('resto-3', 'Real Eatery de noche'),
+    title: 'Noches de música en vivo',
+    text: 'En Real, la gastronomía se une con la música en vivo para crear una experiencia única.',
+  },
+  events: {
+    eyebrow: 'Espacio disponible para eventos',
+    title: 'Eventos Real',
+    text: 'En The Charlee, somos más que un hotel, ya que tenemos espacios adicionales que nos permiten brindarte experiencias inolvidables como el salón de eventos o el Mezzanine.',
+    // Cambia el enlace por el formulario de cotización real
+    button: { label: 'Cotiza aquí tu evento', href: '#contacto' },
+  },
   menu: {
     eyebrow: 'La carta',
     title: ['Platos que', 'vuelven siempre.'],
@@ -58,6 +81,7 @@ export const restaurant = {
     ],
   },
   strip: {
+    layout: 'bento', // cuadrícula fija en lugar del carrusel horizontal
     eyebrow: 'Ambiente',
     title: ['Un día en', 'Real Eatery.'],
     images: [
@@ -69,7 +93,10 @@ export const restaurant = {
       pg('resto-10', 'Café de la mañana'),
     ],
   },
+  // Sin bloque final de reserva: la barra flotante (bookBar) lleva a reservar
+  bookBar: { title: 'Real Eatery', detail: 'El Poblado · Medellín' },
   cta: {
+    panel: false,
     eyebrow: 'Tu mesa',
     aside: 'Piso 1 · Abierto al público',
     title: 'Tu mesa te espera.',
@@ -251,32 +278,48 @@ export const aboutPage = {
     meta: ['Hotel de diseño', 'Parque Lleras', 'El Poblado', 'Medellín'],
     tagline: ['Arte, diseño y hospitalidad', 'en un mismo edificio.'],
   },
+  // Textos oficiales del hotel (tomados del sitio actual)
   statement: {
-    eyebrow: 'Nuestra historia',
-    text: 'The Charlee nació para mostrar otra Medellín: creativa, abierta y orgullosa de su barrio.',
-    body: 'Frente al Parque Lleras, en el corazón de El Poblado, el hotel reúne arte contemporáneo, diseño con carácter y un servicio cercano. Un edificio pensado para vivir la ciudad desde adentro.',
+    eyebrow: 'The Charlee Hotel en Medellín',
+    text: 'Durante 12 años, hemos sido un referente de prestigio y estilo en Medellín.',
+    body: [
+      'Ubicados en el sector El Poblado, una de las zonas más reconocidas de la ciudad a solo 2 calles de Provenza ofrecemos más que una estadía.',
+      'Cada detalle está diseñado para brindar una experiencia única y memorable, a través de nuestro servicio personalizado.',
+      'Descubre el encanto de The Charlee y vive Medellín de una manera inigualable.',
+    ],
   },
+  // Solo cifras que aparecen en los textos oficiales
   stats: [
-    { value: 42, label: 'Habitaciones y suites' },
-    { value: 17, label: 'Pisos' },
-    { value: 360, suffix: '°', label: 'Vista desde el rooftop' },
-    { value: 24, suffix: ' h', label: 'Concierge' },
+    { value: 12, label: 'Años en Medellín' },
+    { value: 42, label: 'Habitaciones' },
+    { value: 2, label: 'Calles de Provenza' },
   ],
-  wide: pg('hotel-4', 'Patio interior del hotel'),
-  panels: [
-    {
-      title: 'Arte en cada piso.',
-      text: 'Obras de artistas colombianos acompañan pasillos, salones y habitaciones. El edificio se recorre como una galería.',
-      src: img('pages/hotel-2'),
-      alt: 'Sala de arte',
-    },
-    {
-      title: 'Diseño con carácter.',
-      text: 'Materiales honestos, luz natural y piezas hechas a medida. Cada espacio tiene su propia personalidad.',
-      src: img('pages/hotel-7'),
-      alt: 'Salón del hotel',
-    },
-  ],
+  // Banner (en el sitio actual es un video): cuando subas el video a public/videos, escribe su ruta en "video" y aparece el botón de play
+  banner: {
+    image: pg('hotel-4', 'Entrada de The Charlee Hotel'),
+    video: null,
+    title: 'The Charlee Hotel en Medellín',
+    sub: 'A joyful stay',
+  },
+  history: {
+    title: 'La historia de nuestro hotel.',
+    eyebrow: 'El hotel Charlee',
+    paragraphs: [
+      'Inaugurado hace 12 años en el barrio El Poblado de Medellín, The Charlee nació con la visión de convertirse en un referente de hospitalidad en la ciudad. Desde sus inicios, The Charlee se distinguió por su diseño arquitectónico y su enfoque en ofrecer una experiencia memorable a sus huéspedes. Con 42 habitaciones, combina la amplitud y la iluminación natural con un estilo contemporáneo, creando un ambiente de confort y distinción.',
+      'Ubicado en el corazón del Parque Lleras, The Charlee tiene proximidad a los mejores restaurantes, bares y tiendas de la ciudad, lo que les permite a los huéspedes explorar y disfrutar de todo lo que Medellín tiene para ofrecer.',
+      'Además, tiene una oferta gastronómica de alcance internacional, donde su atención personalizada y ambiente exclusivo, lo han llevado a ser pionero en la promoción de la cultura local, integrando elementos artísticos y culturales en su diseño.',
+    ],
+  },
+  offer: {
+    title: 'The Charlee Hotel Medellín',
+    intro: 'Haz de tu viaje la mejor experiencia de estilo de vida disfrutando de una amplia oferta en:',
+    items: [
+      { title: 'Cultura', text: 'Conéctate con la esencia de Medellín a través de exposiciones de arte, música en vivo y elementos culturales que enriquecen cada momento de tu estancia.' },
+      { title: 'Arte, diseño y arquitectura', text: 'Espacios contemporáneos que fusionan elegancia y confort, creando ambientes sofisticados y acogedores en cada rincón del hotel.' },
+      { title: 'Wellness', text: 'Experimenta un bienestar integral con nuestras instalaciones de fitness, tratamientos relajantes y espacios diseñados para tu total confort y rejuvenecimiento.' },
+      { title: 'Gastronomía', text: 'Disfruta de experiencias culinarias excepcionales que destacan lo mejor de la cocina local e internacional, con sabores innovadores y un toque único.' },
+    ],
+  },
   location: {
     eyebrow: 'Ubicación',
     title: ['En el centro', 'de todo.'],
@@ -311,14 +354,6 @@ export const aboutPage = {
       { label: 'Real Eatery', kicker: 'Comer', href: '/restaurante', image: img('pages/resto-1') },
       { label: 'Envy Rooftop', kicker: 'Brindar', href: '/rooftop', image: img('pages/envy-1') },
     ],
-  },
-  cta: {
-    eyebrow: 'Tu estadía',
-    aside: 'Parque Lleras · El Poblado',
-    title: 'Ven a conocerlo.',
-    marquee: 'The Charlee — Reservar ahora',
-    button: { label: 'Reservar ahora', href: '/habitaciones' },
-    foot: 'Medellín · Colombia',
   },
 }
 

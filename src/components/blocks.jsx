@@ -44,7 +44,7 @@ function Word({ progress, range, children }) {
 }
 
 /* Frase grande que se enciende palabra por palabra + texto y datos al lado. */
-export function Statement({ dark = false, eyebrow, text, body, rows = [] }) {
+export function Statement({ dark = false, eyebrow, text, body, rows = [], actions = [] }) {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.45'] })
   const words = text.split(' ')
@@ -54,7 +54,7 @@ export function Statement({ dark = false, eyebrow, text, body, rows = [] }) {
         <span className="label tracking-[0.24em] lg:text-xs">{eyebrow}</span>
         <p
           ref={ref}
-          className="mt-6 text-[clamp(1.75rem,7vw,2.75rem)] font-medium leading-[1.08] tracking-[-0.05em] lg:text-[4.2vw] lg:leading-[1.04]"
+          className="mt-6 font-display text-[clamp(1.75rem,7vw,2.75rem)] leading-[1.08] lg:text-[4.2vw] lg:leading-[1.04]"
         >
           {words.map((w, i) => (
             <Word key={i} progress={scrollYProgress} range={[i / words.length, (i + 1) / words.length]}>
@@ -64,23 +64,172 @@ export function Statement({ dark = false, eyebrow, text, body, rows = [] }) {
         </p>
       </div>
       <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:pt-12">
-        {body && (
-          <FadeUp as="p" className="max-w-md text-sm leading-[1.5] tracking-[-0.01em] lg:text-lg lg:leading-[1.4]">
-            {body}
+        {/* body: un texto o una lista de párrafos */}
+        {[].concat(body || []).map((b, i) => (
+          <FadeUp key={i} as="p" delay={i * 0.06} className={`max-w-md text-sm leading-[1.5] tracking-[-0.01em] lg:text-lg lg:leading-[1.4] ${i ? 'mt-4 lg:mt-5' : ''}`}>
+            {b}
           </FadeUp>
-        )}
+        ))}
         {rows.length > 0 && (
           <dl className="mt-10">
             {rows.map((r, i) => (
               <FadeUp key={r.label} delay={i * 0.06} className={`flex items-baseline justify-between gap-6 border-t py-4 last:border-b ${line(dark)}`}>
                 <dt className={`text-[11px] uppercase tracking-[0.18em] ${soft(dark)}`}>{r.label}</dt>
-                <dd className="text-right text-base font-medium tracking-[-0.03em] lg:text-xl">{r.value}</dd>
+                <dd className="text-right text-base font-medium tracking-[-0.03em] lg:text-xl">
+                  {r.href ? (
+                    <a href={r.href} target={r.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="group">
+                      <Roll>{r.value}</Roll>
+                    </a>
+                  ) : (
+                    r.value
+                  )}
+                </dd>
               </FadeUp>
             ))}
           </dl>
         )}
+        {/* Botones opcionales: el primero relleno (principal), el resto con borde */}
+        {actions.length > 0 && (
+          <FadeUp delay={0.1} className="mt-10 flex flex-wrap gap-3">
+            {actions.map((a, i) =>
+              i === 0 ? (
+                <SiteLink
+                  key={a.label}
+                  href={a.href}
+                  className="group inline-block rounded-full bg-terracotta px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-bone transition-colors hover:bg-terracotta-dark"
+                >
+                  <Roll>{a.label} →</Roll>
+                </SiteLink>
+              ) : (
+                <Pill key={a.label} href={a.href} dark={dark}>
+                  {a.label}
+                </Pill>
+              ),
+            )}
+          </FadeUp>
+        )}
       </div>
     </div>
+  )
+}
+
+/* Foto ancha con título, separador y texto encima (p. ej. "Noches de música en vivo"). */
+export function PhotoBanner({ id, image, title, text }) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  const y = useTransform(scrollYProgress, [0, 1], ['-8%', '8%'])
+  return (
+    <section id={id} className="relative z-20 bg-bone px-3 py-3 md:px-5 lg:px-8">
+      <div ref={ref} className="relative h-[calc(var(--ah)*70)] overflow-hidden rounded-[28px] bg-ink text-bone md:rounded-[36px] lg:h-[calc(var(--ah)*80)]">
+        <motion.div className="absolute inset-0 h-[116%] -translate-y-[8%]" style={{ y }}>
+          <Img src={image.src} alt={image.alt} className="h-full w-full" />
+        </motion.div>
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
+          <FadeUp as="h2" className="text-[clamp(2rem,8vw,4.5rem)] leading-[1.02] lg:text-[4.8vw]">
+            {title}
+          </FadeUp>
+          <FadeUp delay={0.1} className="my-6 flex w-[min(16rem,60vw)] items-center gap-3 text-bone/80" aria-hidden>
+            <span className="h-px flex-1 bg-current" />
+            <span className="h-2 w-2 rotate-45 bg-current" />
+            <span className="h-px flex-1 bg-current" />
+          </FadeUp>
+          <FadeUp as="p" delay={0.15} className="max-w-xl text-base leading-[1.5] text-bone/90 md:text-lg">
+            {text}
+          </FadeUp>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* Cuadrícula fija "bento": 6 fotos de distintos tamaños que encajan en un rectángulo.
+   Escritorio (4 columnas × 3 filas):  A A B C / A A D C / E F F F.  Móvil: 2 columnas.
+   Al pasar el mouse la foto se acerca y aparece su nombre; un clic la amplía. */
+const BENTO = [
+  'col-span-2 aspect-[4/3] lg:aspect-auto lg:col-span-2 lg:row-span-2',
+  'aspect-square lg:aspect-auto',
+  'aspect-square lg:aspect-auto lg:row-span-2',
+  'aspect-square lg:aspect-auto',
+  'aspect-square lg:aspect-auto',
+  'col-span-2 aspect-[16/9] lg:aspect-auto lg:col-span-3',
+]
+
+export function Bento({ id, eyebrow, title, images }) {
+  const [open, setOpen] = useState(null)
+  const n = images.length
+  return (
+    <section id={id} className="relative z-20 bg-bone px-6 py-24 text-ink md:px-10 lg:py-36">
+      <Heading eyebrow={`${eyebrow} — ${pad(n)}`} title={title} className="mb-10 lg:mb-16">
+        <FadeUp as="p" className="max-w-xs text-sm leading-[1.5] text-ink/70 lg:text-base">
+          Toca una foto para verla en grande.
+        </FadeUp>
+      </Heading>
+      <div className="grid grid-cols-2 gap-2 md:gap-3 lg:h-[calc(var(--ah)*84)] lg:grid-cols-4 lg:grid-rows-3">
+        {images.map((im, i) => (
+          <FadeUp key={im.src} delay={(i % 3) * 0.06} className={`min-h-0 ${BENTO[i % BENTO.length]}`}>
+            <button
+              type="button"
+              onClick={() => setOpen(i)}
+              aria-label={`Ampliar: ${im.alt}`}
+              className="group relative block h-full w-full cursor-zoom-in overflow-hidden rounded-[18px] bg-ink md:rounded-[24px]"
+            >
+              <Img
+                src={im.src}
+                alt={im.alt}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="h-full w-full transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.06]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
+              <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-left text-bone md:p-5">
+                <span className="min-w-0">
+                  <span className="block text-[10px] tabular-nums tracking-[0.16em] text-bone/70">{pad(i + 1)}</span>
+                  <span className="mt-1 block truncate text-[11px] uppercase tracking-[0.18em] md:text-xs">{im.alt}</span>
+                </span>
+                <span className="hidden h-9 w-9 shrink-0 translate-y-2 items-center justify-center rounded-full bg-bone text-ink opacity-0 transition-all duration-500 ease-out-expo group-hover:translate-y-0 group-hover:opacity-100 md:flex">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                </span>
+              </span>
+            </button>
+          </FadeUp>
+        ))}
+      </div>
+      <AnimatePresence>
+        {open !== null && (
+          <Lightbox images={images} index={open} onClose={() => setOpen(null)} onStep={(d) => setOpen((k) => (k + d + n) % n)} />
+        )}
+      </AnimatePresence>
+    </section>
+  )
+}
+
+/* Banda de color con etiqueta, título, texto y un botón (p. ej. "Eventos Real"). */
+export function InfoBand({ id, eyebrow, title, text, button }) {
+  return (
+    <section id={id} className="relative z-20 bg-bone px-3 py-3 md:px-5 lg:px-8">
+      <div className="flex flex-col items-center rounded-[28px] bg-olive px-6 py-20 text-center text-bone md:rounded-[36px] lg:py-28">
+        <FadeUp as="p" className="text-[11px] font-medium uppercase tracking-[0.24em] text-bone/80 md:text-xs">
+          {eyebrow}
+        </FadeUp>
+        <FadeUp as="h2" delay={0.05} className="mt-5 text-[clamp(2.4rem,10vw,5rem)] leading-[1] lg:text-[5.4vw]">
+          {title}
+        </FadeUp>
+        <FadeUp as="p" delay={0.1} className="mt-6 max-w-2xl text-base leading-[1.6] text-bone/85 md:text-lg">
+          {text}
+        </FadeUp>
+        <FadeUp delay={0.15} className="mt-10">
+          <SiteLink
+            href={button.href}
+            className="group inline-flex items-center gap-3 rounded-full bg-bone py-2 pl-6 pr-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-white"
+          >
+            <Roll>{button.label}</Roll>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-olive text-bone transition-transform duration-500 ease-out-expo group-hover:translate-x-1">→</span>
+          </SiteLink>
+        </FadeUp>
+      </div>
+    </section>
   )
 }
 
@@ -274,7 +423,7 @@ function Count({ value, suffix = '' }) {
 /* Cifras grandes que cuentan al entrar en pantalla. */
 export function Stats({ dark = false, items }) {
   return (
-    <div className={`grid grid-cols-2 border-t lg:grid-cols-4 ${line(dark)} mx-6 md:mx-10`}>
+    <div className={`grid grid-cols-2 border-t ${items.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} ${line(dark)} mx-6 md:mx-10`}>
       {items.map((s, i) => (
         <FadeUp key={s.label} delay={i * 0.08} className={`border-b py-8 lg:py-12 ${line(dark)} ${i % 2 ? 'pl-5' : ''} lg:pl-0`}>
           <div className="text-[clamp(2.6rem,12vw,5rem)] font-medium leading-none tracking-[-0.06em] lg:text-[6.4vw]">

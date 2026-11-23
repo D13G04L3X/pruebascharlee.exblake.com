@@ -6,6 +6,7 @@ import Preloader from './components/Preloader'
 import Nav from './components/Nav'
 import { INOUT } from './components/ui'
 import { brand } from './content'
+import { HOME, isEnabled } from './site'
 import Home from './pages/Home'
 import Rooms from './pages/Rooms'
 import Room from './pages/Room'
@@ -14,10 +15,6 @@ import Experiences from './pages/Experiences'
 import Gallery from './pages/Gallery'
 import About from './pages/About'
 
-/* MODO VISTA PREVIA: solo se puede navegar por Habitaciones.
-   Ponlo en false para volver a habilitar todo el sitio. */
-const ROOMS_ONLY = false
-const isRoomsPath = (p) => p === '/habitaciones' || p.startsWith('/habitaciones/')
 
 const scrollTo = (target, opts) => {
   if (window.lenis?.scrollTo) window.lenis.scrollTo(target, { force: true, ...opts })
@@ -70,6 +67,18 @@ function Curtain() {
   )
 }
 
+// Todas las páginas del sitio (se publican solo las activas en src/site.js)
+const PAGES = [
+  { path: '/', render: (ready) => <Home ready={ready} /> },
+  { path: '/habitaciones', render: (ready) => <Rooms ready={ready} /> },
+  { path: '/habitaciones/:slug', render: (ready) => <RoomRoute ready={ready} /> },
+  { path: '/restaurante', render: (ready) => <Restaurant ready={ready} /> },
+  { path: '/rooftop', render: (ready) => <EnvyRooftop ready={ready} /> },
+  { path: '/experiencias', render: (ready) => <Experiences ready={ready} /> },
+  { path: '/galeria', render: (ready) => <Gallery ready={ready} /> },
+  { path: '/hotel', render: (ready) => <About ready={ready} /> },
+]
+
 function RoomRoute({ ready }) {
   const { slug } = useParams()
   return <Room key={slug} slug={slug} ready={ready} />
@@ -103,25 +112,6 @@ export default function App() {
     if (ready) lenis.current?.start()
   }, [ready])
 
-  // Vista previa: bloquea cualquier enlace interno que no sea de habitaciones
-  useEffect(() => {
-    if (!ROOMS_ONLY) return
-    const block = (e) => {
-      const a = e.target.closest?.('a[href]')
-      if (!a) return
-      const href = a.getAttribute('href')
-      if (href.startsWith('#')) return
-      const url = new URL(a.href, window.location.href)
-      if (url.origin !== window.location.origin) return
-      if (!isRoomsPath(url.pathname)) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    }
-    document.addEventListener('click', block, true)
-    return () => document.removeEventListener('click', block, true)
-  }, [])
-
   // Enlaces #ancla dentro de la misma página
   useEffect(() => {
     const onClick = (e) => {
@@ -145,25 +135,11 @@ export default function App() {
         <Curtain />
         <Nav ready={ready} />
         <Routes>
-          {ROOMS_ONLY ? (
-            <>
-              <Route path="/habitaciones" element={<Rooms ready={ready} />} />
-              <Route path="/habitaciones/:slug" element={<RoomRoute ready={ready} />} />
-              <Route path="*" element={<Navigate to="/habitaciones" replace />} />
-            </>
-          ) : (
-            <>
-              <Route path="/" element={<Home ready={ready} />} />
-              <Route path="/habitaciones" element={<Rooms ready={ready} />} />
-              <Route path="/habitaciones/:slug" element={<RoomRoute ready={ready} />} />
-              <Route path="/restaurante" element={<Restaurant ready={ready} />} />
-              <Route path="/rooftop" element={<EnvyRooftop ready={ready} />} />
-              <Route path="/experiencias" element={<Experiences ready={ready} />} />
-              <Route path="/galeria" element={<Gallery ready={ready} />} />
-              <Route path="/hotel" element={<About ready={ready} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </>
-          )}
+          {/* Solo las páginas activas (src/site.js); el resto redirige a HOME */}
+          {PAGES.filter((pg) => isEnabled(pg.path)).map((pg) => (
+            <Route key={pg.path} path={pg.path} element={pg.render(ready)} />
+          ))}
+          <Route path="*" element={<Navigate to={HOME} replace />} />
         </Routes>
       </BrowserRouter>
     </MotionConfig>

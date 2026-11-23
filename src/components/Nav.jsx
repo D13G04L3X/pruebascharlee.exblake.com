@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { booking, brand, footer, nav } from '../content'
+import { booking, brand, footer, nav as allNav } from '../content'
+import { onlyEnabled } from '../site'
 import { EASE, INOUT, Img, Roll, SiteLink, pad } from './ui'
+
+// Enlaces del menú: solo páginas activas (src/site.js)
+const nav = onlyEnabled(allNav)
 
 const layer = (openDelay, closeDelay) => ({
   closed: { x: '-100%', transition: { duration: 0.75, ease: INOUT, delay: closeDelay } },
