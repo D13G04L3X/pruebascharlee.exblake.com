@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "imagenes": "node scripts/optimizar-imagenes.mjs",
+    "predev": "npm run imagenes",
     "dev": "vite",
+    "prebuild": "npm run imagenes",
     "build": "vite build",
     "preview": "vite preview",
     "revisar": "node scripts/revisar-archivos.mjs"
@@ -20,6 +23,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
     "@vitejs/plugin-react": "^6.3.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.5",
     "vite": "^8.3.8"
   }

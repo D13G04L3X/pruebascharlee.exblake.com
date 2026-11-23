@@ -74,7 +74,7 @@ body { overflow-x: clip; }
 
 /* Títulos con Milanesa Serif, en su peso regular como en el manual. La serif necesita
    más aire que la Montserrat, así que se afloja el interletrado ajustado de los títulos. */
-h1, h2, h3, .font-display {
+h1:not(.font-sans), h2:not(.font-sans), h3:not(.font-sans), .font-display {
   font-family: var(--font-display);
   font-weight: 400 !important;
   letter-spacing: -0.015em !important;

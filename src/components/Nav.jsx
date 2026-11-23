@@ -96,7 +96,7 @@ function Menu({ onClose }) {
                     animate={{ scale: 1 }}
                     transition={{ duration: 1.4, ease: EASE }}
                   >
-                    <Img src={nav[shown].image} alt="" eager className="h-full w-full" />
+                    <Img src={nav[shown].image} alt="" eager sizes="50vw" className="h-full w-full" />
                   </motion.div>
                 </motion.div>
               </AnimatePresence>

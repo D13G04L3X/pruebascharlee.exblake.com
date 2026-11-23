@@ -73,7 +73,6 @@ function RoomHero({ room, ready }) {
             <video
               ref={video}
               src={room.video}
-              poster={room.images[0].src}
               autoPlay
               muted
               loop
@@ -272,6 +271,7 @@ function RoomGalleryDesktop({ room }) {
                     <Img
                       src={im.src}
                       alt={im.alt}
+                      sizes="(min-width: 1024px) 36vw, 74vw"
                       className="h-full w-full transition-transform duration-[1.4s] ease-out-expo group-hover:scale-[1.06]"
                     />
                   </button>
@@ -408,7 +408,7 @@ function RoomGalleryMobile({ room }) {
                   aria-label={`Ampliar: ${im.alt}`}
                   className="relative min-h-0 flex-1 cursor-zoom-in overflow-hidden rounded-[24px] bg-ink md:rounded-[32px]"
                 >
-                  <Img src={im.src} alt={im.alt} className="pointer-events-none h-full w-full" />
+                  <Img src={im.src} alt={im.alt} sizes="78vw" className="pointer-events-none h-full w-full" />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/25" />
                   <span className="pointer-events-none absolute right-5 top-5 text-[11px] uppercase tracking-[0.18em] text-white tabular-nums">
                     {pad(i + 1)} <span className="opacity-50">/ {pad(n)}</span>
@@ -650,6 +650,7 @@ function RoomSlide({ room, i, total, wasDragged, onButton }) {
         <Img
           src={room.images[0].src}
           alt={room.images[0].alt}
+          sizes="(min-width: 1024px) 40vw, 78vw"
           className="pointer-events-none h-full w-full transition-transform duration-[1.6s] ease-out-expo group-hover:scale-[1.06]"
         />
         <video

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import imagenes from '../imagenes.json' // índice de versiones optimizadas (lo genera "npm run imagenes")
 
 export const EASE = [0.16, 1, 0.3, 1] // expo.out
 export const INOUT = [0.65, 0, 0.35, 1] // power3.inOut
@@ -45,9 +46,33 @@ const TONES = [
   ['#5a564d', '#24231f'],
 ]
 
+/* Versiones optimizadas de una foto de /public/images (las genera scripts/optimizar-imagenes.mjs):
+   devuelve los srcset AVIF y WebP, o null si la foto no tiene versiones (se usa el original). */
+export function responsive(src) {
+  const m = imagenes[src]
+  if (!m) return null
+  const base = src.replace(/^\/images\//, '/_img/').replace(/\.[^.]+$/, '')
+  const set = (fmt) => m.anchos.map((w) => `${base}-${w}.${fmt} ${w}w`).join(', ')
+  return { avif: set('avif'), webp: set('webp'), w: m.w, h: m.h }
+}
+
+/* Foto optimizada: AVIF → WebP → original, en el ancho que necesita la pantalla.
+   `sizes` dice qué tan ancha se ve la foto (por defecto, todo el ancho de la pantalla). */
+export function Picture({ src, alt = '', sizes = '100vw', className = '', ...rest }) {
+  const r = responsive(src)
+  if (!r) return <img src={src} alt={alt} className={className} {...rest} />
+  return (
+    <picture>
+      <source type="image/avif" srcSet={r.avif} sizes={sizes} />
+      <source type="image/webp" srcSet={r.webp} sizes={sizes} />
+      <img src={src} alt={alt} width={r.w} height={r.h} className={className} {...rest} />
+    </picture>
+  )
+}
+
 /* Imagen con placeholder: si el archivo aún no existe en /public/images,
    muestra un bloque tonal con la ruta que hay que reemplazar. */
-export function Img({ src, alt = '', className = '', dark = false, eager = false }) {
+export function Img({ src, alt = '', className = '', dark = false, eager = false, sizes = '100vw' }) {
   const [failed, setFailed] = useState(false)
   const hash = [...src].reduce((a, c) => a + c.charCodeAt(0), 0)
   const [from, to] = dark ? TONES[5] : TONES[hash % 5]
@@ -63,10 +88,12 @@ export function Img({ src, alt = '', className = '', dark = false, eager = false
           <span className="label text-white/70">public{src}</span>
         </div>
       ) : (
-        <img
+        <Picture
           src={src}
           alt={alt}
+          sizes={sizes}
           loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
           onError={() => setFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />

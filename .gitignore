@@ -429,3 +429,8 @@ FodyWeavers.xsd
 
 # Salida del build de Vite (la genera GitHub Actions; no se sube al repo)
 dist/
+
+# Versiones optimizadas de las fotos (AVIF/WebP) y su índice: se generan solas con "npm run imagenes"
+public/_img/
+src/imagenes.json
+.cache/

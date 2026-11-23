@@ -37,6 +37,18 @@ jobs:
       - name: Revisar imágenes y videos
         run: npm run revisar
 
+      # Versiones AVIF/WebP de las fotos: se guardan entre publicaciones para no regenerarlas todas cada vez
+      # (el build solo procesa las fotos nuevas o cambiadas)
+      - name: Recuperar imágenes optimizadas
+        uses: actions/cache@v4
+        with:
+          path: |
+            public/_img
+            .cache/imagenes-huellas.json
+          key: imagenes-${{ hashFiles('public/images/**', 'scripts/optimizar-imagenes.mjs') }}
+          restore-keys: imagenes-
+
+      # "npm run build" primero optimiza las imágenes (prebuild) y luego genera el sitio con Vite
       - name: Generar el sitio
         run: npm run build
 

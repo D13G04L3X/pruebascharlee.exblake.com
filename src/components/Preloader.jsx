@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, animate, motion } from 'framer-motion'
 import { brand, cards, gallery, hero, rooftop, spaces } from '../content'
-import { EASE, INOUT, pad, useIsDesktop } from './ui'
+import { EASE, INOUT, Picture, pad, useIsDesktop } from './ui'
 
 // Fotos que pasan por la ventana mientras carga; la última es la del hero,
 // así la ventana se abre directamente sobre la portada.
@@ -15,9 +15,6 @@ export default function Preloader({ onDone }) {
   const [phase, setPhase] = useState('load') // load → open → gone
 
   useEffect(() => {
-    FRAMES.forEach((src) => {
-      new Image().src = src
-    })
     let timer
     const controls = animate(0, 100, {
       duration: 2.6,
@@ -63,10 +60,11 @@ export default function Preloader({ onDone }) {
               transition={{ duration: 1.2, ease: INOUT }}
             >
               {FRAMES.map((src, i) => (
-                <img
+                <Picture
                   key={src}
                   src={src}
                   alt=""
+                  sizes="100vw"
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ opacity: i <= frame ? 1 : 0 }}
                   onError={(e) => (e.currentTarget.style.visibility = 'hidden')}
@@ -80,7 +78,7 @@ export default function Preloader({ onDone }) {
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center mix-blend-difference">
             <h1
               aria-label={brand}
-              className="flex overflow-hidden whitespace-pre pb-[0.1em] text-[clamp(2.1rem,10.5vw,10rem)] font-semibold leading-none tracking-[-0.06em] text-white"
+              className="flex overflow-hidden whitespace-pre pb-[0.1em] font-sans text-[clamp(2.1rem,10.5vw,10rem)] font-semibold leading-none tracking-[-0.06em] text-white"
             >
               {[...brand].map((ch, i) => (
                 <motion.span

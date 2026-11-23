@@ -163,7 +163,7 @@ export function Strip({ dark = false, id, eyebrow, title, images }) {
                   aria-label={`Ampliar: ${im.alt}`}
                   className="block h-full w-full cursor-zoom-in overflow-hidden rounded-[20px] md:rounded-[28px]"
                 >
-                  <Img src={im.src} alt={im.alt} className="h-full w-full transition-transform duration-[1.4s] ease-out-expo group-hover:scale-[1.06]" />
+                  <Img src={im.src} alt={im.alt} sizes="(min-width: 1024px) 36vw, 74vw" className="h-full w-full transition-transform duration-[1.4s] ease-out-expo group-hover:scale-[1.06]" />
                 </button>
                 <figcaption className={`mt-3 flex justify-between gap-4 text-[10px] uppercase tracking-[0.16em] ${soft(dark)}`}>
                   <span>{im.alt}</span>

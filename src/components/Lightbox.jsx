@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Chevron, Close, EASE, pad } from './ui'
+import { Chevron, Close, EASE, Picture, pad, responsive } from './ui'
 
 /* Foto ampliada a pantalla completa, como carrusel:
    - Se desliza con el dedo / se arrastra con el mouse, flechas a los lados y teclado (← → Esc).
@@ -52,7 +52,14 @@ export default function Lightbox({ images, index, onClose, onStep }) {
   useEffect(() => {
     ;[1, -1].forEach((d) => {
       const img = new Image()
-      img.src = images[(index + d + n) % n].src
+      const src = images[(index + d + n) % n].src
+      const r = responsive(src)
+      // Mismo srcset/sizes que la foto ampliada (AVIF): el navegador elige la misma versión y queda en caché
+      if (r) {
+        img.sizes = '100vw'
+        img.srcset = r.avif
+      }
+      img.src = src
     })
   }, [index, images, n])
 
@@ -110,9 +117,10 @@ export default function Lightbox({ images, index, onClose, onStep }) {
             className="absolute inset-0 flex cursor-grab touch-pan-y items-center justify-center px-4 active:cursor-grabbing md:px-28"
             onClick={(e) => e.target === e.currentTarget && onClose()}
           >
-            <img
+            <Picture
               src={images[index].src}
               alt={images[index].alt}
+              sizes="100vw"
               draggable={false}
               className="pointer-events-none max-h-full max-w-full rounded-xl object-contain md:rounded-2xl"
             />
@@ -145,7 +153,7 @@ export default function Lightbox({ images, index, onClose, onStep }) {
                 i === index ? 'opacity-100 ring-2 ring-bone ring-offset-2 ring-offset-[#2b2c25]' : 'opacity-40 hover:opacity-80'
               }`}
             >
-              <img src={im.src} alt="" draggable={false} className="h-full w-full object-cover" />
+              <Picture src={im.src} alt="" sizes="96px" draggable={false} className="h-full w-full object-cover" />
             </button>
           ))}
         </div>
