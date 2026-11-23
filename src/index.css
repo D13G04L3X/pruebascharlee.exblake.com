@@ -1,14 +1,52 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bone: #ede6d6;
-  --color-ink: #2a2725;
-  --color-leaf: #3fa85b;
+/* Milanesa Serif (manual de marca): títulos y textos destacados. Archivos en /public/fonts. */
+@font-face { font-family: "Milanesa Serif"; src: url("/fonts/MilanesaSerif-Light.otf") format("opentype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Milanesa Serif"; src: url("/fonts/MilanesaSerif-Regular.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Milanesa Serif"; src: url("/fonts/MilanesaSerif-DemiBold.otf") format("opentype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Milanesa Serif"; src: url("/fonts/MilanesaSerif-Bold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
 
+@theme {
+  /* Paleta del manual de marca (sin el rosado #D29CA5).
+     bone e ink son los colores base de todo el sitio: fondo claro y texto / superficies oscuras. */
+  --color-bone: #f7f6e9;      /* crema del manual: fondo */
+  --color-ink: #45463c;       /* oliva oscuro (derivado de #67685B) para texto legible y superficies oscuras */
+  --color-olive: #67685b;     /* oliva */
+  --color-sage: #919d86;      /* salvia: acentos sobre fondos oscuros */
+  --color-sage-deep: #6f7b62; /* salvia profundo: títulos sobre el crema (el salvia exacto ahí queda muy tenue) */
+  --color-terracotta: #b46853; /* terracota: botones de reserva */
+  --color-terracotta-dark: #9a5543;
+  --color-stone: #d3d1c5;     /* piedra: bordes y fondos secundarios */
+
+  /* Montserrat: texto general (paquete @fontsource, la misma de Google Fonts, servida desde el sitio) */
   --font-sans: "Montserrat Variable", "Montserrat", Arial, sans-serif;
-  --font-display: var(--font-sans);
+  /* Milanesa Serif: títulos y textos destacados */
+  --font-display: "Milanesa Serif", Georgia, "Times New Roman", serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Halo suave que late alrededor del botón principal (Reservar) para llamar la atención */
+  --animate-halo: halo 2.8s ease-out infinite;
+  @keyframes halo {
+    0% { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(180, 104, 83, 0.55); }
+    70%, 100% { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 16px rgba(180, 104, 83, 0); }
+  }
+
+  /* Versión discreta del halo para la barra flotante de reserva: más lenta y tenue */
+  --animate-halo-soft: halo-soft 3.6s ease-out infinite;
+  @keyframes halo-soft {
+    0% { box-shadow: 0 0 0 0 rgba(180, 104, 83, 0.5); }
+    60%, 100% { box-shadow: 0 0 0 9px rgba(180, 104, 83, 0); }
+  }
+
+  /* La flecha avanza un poco cada pocos segundos, invitando a hacer clic */
+  --animate-nudge: nudge 3.6s ease-in-out infinite;
+  @keyframes nudge {
+    0%, 70%, 100% { transform: translateX(0); }
+    78% { transform: translateX(4px); }
+    86% { transform: translateX(0); }
+    92% { transform: translateX(2px); }
+  }
 
   --animate-marquee: marquee 20s linear infinite;
   @keyframes marquee {
@@ -16,15 +54,31 @@
   }
 }
 
+/* Alto del header fijo. Las secciones fijas (sticky) se colocan debajo de él;
+   --ah es 1% del alto disponible bajo el header (como 1svh, pero sin contar el header). */
+:root {
+  --nav-h: 56px;
+  --ah: calc((100svh - var(--nav-h)) / 100);
+}
+@media (min-width: 768px) { :root { --nav-h: 64px; } }
+
 html {
   background: var(--color-bone);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  scroll-padding-top: 1rem;
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
 }
 
 body { overflow-x: clip; }
+
+/* Títulos con Milanesa Serif, en su peso regular como en el manual. La serif necesita
+   más aire que la Montserrat, así que se afloja el interletrado ajustado de los títulos. */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-weight: 400 !important;
+  letter-spacing: -0.015em !important;
+}
 
 ::selection { background: var(--color-ink); color: var(--color-bone); }
 

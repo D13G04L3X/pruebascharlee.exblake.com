@@ -193,7 +193,7 @@ export default function About() {
       />
 
       <div ref={pin} className="relative z-40" style={{ height: desktop ? '420vh' : '260vh' }}>
-        <div ref={stage} className="sticky top-0 h-svh w-full overflow-hidden">
+        <div ref={stage} className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full overflow-hidden">
           <div
             ref={slotCenter}
             aria-hidden

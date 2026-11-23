@@ -89,7 +89,7 @@ export default function Gallery({ ready }) {
           lines={title}
           show={ready}
           delay={0.1}
-          className="text-[clamp(2.3rem,10.5vw,5.5rem)] font-medium leading-[0.98] tracking-[-0.05em] lg:text-[8.2vw]"
+          className="text-[clamp(2.3rem,10.5vw,5.5rem)] text-sage-deep font-medium leading-[0.98] tracking-[-0.05em] lg:text-[8.2vw]"
         />
         <motion.div
           className="mt-8 flex flex-col gap-6 border-t border-ink/20 pt-5 lg:mt-12 lg:flex-row lg:items-start lg:justify-between"

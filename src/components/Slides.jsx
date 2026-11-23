@@ -37,7 +37,7 @@ export default function Slides({ items = features, id = 'detalle', dark = false 
 
   return (
     <section id={id} ref={pin} className={`relative z-20 w-full ${dark ? 'bg-ink text-bone' : 'bg-bone text-ink'}`} style={{ height: `${scrollLen + 100}vh` }}>
-      <div ref={stage} className="sticky top-0 h-svh w-full overflow-hidden p-3 md:p-5 lg:p-8">
+      <div ref={stage} className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full overflow-hidden p-3 md:p-5 lg:p-8">
         <div className="relative h-full w-full">
           {items.map((f, i) => {
             const on = i === 0 ? shown : active >= i

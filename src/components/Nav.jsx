@@ -42,7 +42,7 @@ function Menu({ onClose }) {
                       style={{ opacity: hover === null || hover === i ? 1 : 0.3 }}
                     >
                       <span className="w-6 text-[10px] tabular-nums tracking-[0.16em] text-bone/50 lg:text-xs">{pad(i + 1)}</span>
-                      <Roll className="text-[clamp(1.7rem,min(9vw,5.2svh),3.5rem)] font-medium leading-[1.08] tracking-[-0.05em] lg:text-[min(4.6vw,7svh)]">
+                      <Roll className="font-display text-[clamp(1.7rem,min(9vw,5.2svh),3.5rem)] leading-[1.08] tracking-[-0.05em] lg:text-[min(4.6vw,7svh)]">
                         {l.label}
                       </Roll>
                       <span className="ml-auto -translate-x-3 self-center text-xl opacity-0 transition-all duration-500 ease-out-expo group-hover:translate-x-0 group-hover:opacity-100 lg:text-3xl">
@@ -69,7 +69,7 @@ function Menu({ onClose }) {
                 <SiteLink
                   href={booking.href}
                   onClick={onClose}
-                  className="group inline-block rounded-full bg-bone px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-ink transition-colors hover:bg-white"
+                  className="group inline-block rounded-full bg-terracotta px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-bone transition-colors hover:bg-terracotta-dark"
                 >
                   <Roll>{booking.label} →</Roll>
                 </SiteLink>
@@ -122,6 +122,36 @@ export default function Nav({ ready }) {
   // Se cierra al navegar
   useEffect(() => setOpen(false), [pathname, hash, key])
 
+  // Transparente sobre la primera sección de la página; sólido en cuanto se deja atrás.
+  // Depende solo de la posición (no de la dirección del scroll), así no titila.
+  const [solid, setSolid] = useState(false)
+  useEffect(() => {
+    let frame = 0
+    const check = () => {
+      frame = 0
+      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64
+      // La portada suele ser sticky y su offsetTop cambia mientras está pegada, así que
+      // se mide dónde empieza la siguiente sección que no es sticky.
+      let next = document.querySelector('main')?.firstElementChild?.nextElementSibling
+      while (next && getComputedStyle(next).position === 'sticky') next = next.nextElementSibling
+      const end = next ? next.offsetTop - navH : window.innerHeight - navH
+      setSolid(window.scrollY >= end)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check)
+    }
+    check()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [pathname])
+
+  const look = open ? 'open' : solid ? 'solid' : 'clear'
+
   // Abierto: sin scroll de fondo y Escape para cerrar
   useEffect(() => {
     if (!open) return
@@ -141,15 +171,26 @@ export default function Nav({ ready }) {
       <AnimatePresence>{open && <Menu key="menu" onClose={() => setOpen(false)} />}</AnimatePresence>
 
       <motion.nav
-        className="pointer-events-none fixed left-0 top-0 z-50 w-full px-6 py-4 text-white mix-blend-difference md:px-10"
+        className={`fixed left-0 top-0 z-50 flex h-(--nav-h) w-full items-center px-6 transition-[background-color,color,box-shadow] duration-500 md:px-10 ${
+          look === 'solid'
+            ? 'bg-bone text-ink shadow-[0_1px_0_rgba(69,70,60,0.12)]'
+            : look === 'open'
+              ? 'bg-transparent text-bone'
+              : 'pointer-events-none bg-transparent text-white mix-blend-difference'
+        }`}
         initial={{ opacity: 0 }}
         animate={{ opacity: ready ? 1 : 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
-        <div className="flex items-start justify-between">
+        {/* Arriba: transparente con mix-blend-difference (se ve sobre fondos claros y oscuros).
+            Pasada la primera sección: barra sólida; las secciones fijas empiezan debajo (--nav-h). */}
+        <div className="flex w-full items-center justify-between">
           <SiteLink href="/" className="pointer-events-auto block leading-none" aria-label="The Charlee, inicio">
-            {/* Logo en blanco: el nav usa mix-blend-difference para verse sobre fondos claros y oscuros */}
-            <img src="/images/logos/charlee-header.svg" alt={brand} className="block h-5 w-auto brightness-0 invert md:h-6" />
+            <img
+              src="/images/logos/charlee-header.svg"
+              alt={brand}
+              className={`block h-5 w-auto brightness-0 md:h-6 ${look === 'solid' ? '' : 'invert'}`}
+            />
           </SiteLink>
           <button
             type="button"

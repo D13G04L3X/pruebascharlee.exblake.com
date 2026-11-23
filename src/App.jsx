@@ -16,7 +16,7 @@ import About from './pages/About'
 
 /* MODO VISTA PREVIA: solo se puede navegar por Habitaciones.
    Ponlo en false para volver a habilitar todo el sitio. */
-const ROOMS_ONLY = true
+const ROOMS_ONLY = false
 const isRoomsPath = (p) => p === '/habitaciones' || p.startsWith('/habitaciones/')
 
 const scrollTo = (target, opts) => {

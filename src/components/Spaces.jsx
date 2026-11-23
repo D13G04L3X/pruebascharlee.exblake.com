@@ -51,7 +51,7 @@ export default function Spaces() {
 
   return (
     <section id="hotel" ref={ref} className="relative z-10 bg-bone text-ink" style={{ height: `${total + 100}vh` }}>
-      <div className="sticky top-0 h-svh w-full overflow-hidden">
+      <div className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full overflow-hidden">
         {/* Marquee */}
         <div aria-hidden className="pointer-events-none absolute inset-0 z-10 flex items-center overflow-hidden">
           <motion.div style={{ opacity: trackOpacity, y: trackY }}>

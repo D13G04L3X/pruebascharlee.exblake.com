@@ -106,10 +106,10 @@ export function Heading({ eyebrow, title, className = '', children }) {
 }
 
 const SHAPES = [
-  'h-[58svh] w-[74vw] md:w-[40vw] lg:w-[36vw]',
-  'h-[44svh] w-[60vw] md:w-[30vw] lg:w-[24vw] mt-[14svh]',
-  'h-[62svh] w-[66vw] md:w-[32vw] lg:w-[27vw] -mt-[4svh]',
-  'h-[40svh] w-[70vw] md:w-[38vw] lg:w-[32vw] mt-[18svh]',
+  'h-[calc(var(--ah)*58)] w-[74vw] md:w-[40vw] lg:w-[36vw]',
+  'h-[calc(var(--ah)*44)] w-[60vw] md:w-[30vw] lg:w-[24vw] mt-[calc(var(--ah)*14)]',
+  'h-[calc(var(--ah)*62)] w-[66vw] md:w-[32vw] lg:w-[27vw] -mt-[calc(var(--ah)*4)]',
+  'h-[calc(var(--ah)*40)] w-[70vw] md:w-[38vw] lg:w-[32vw] mt-[calc(var(--ah)*18)]',
 ]
 
 /* Tira horizontal fija: el scroll vertical mueve las fotos. Se amplían al tocarlas. */
@@ -140,9 +140,9 @@ export function Strip({ dark = false, id, eyebrow, title, images }) {
   return (
     <section id={id} className={`relative z-20 ${tone(dark)}`}>
       <div ref={section} style={{ height: `${120 + n * 55}vh` }}>
-        <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
+        <div className="sticky top-(--nav-h) flex h-[calc(100svh-var(--nav-h))] flex-col justify-center overflow-hidden">
           <motion.div ref={track} style={{ x }} className="flex w-max items-start gap-4 px-6 will-change-transform md:gap-6 md:px-10">
-            <div className="flex h-[58svh] w-[78vw] shrink-0 flex-col justify-between pr-4 md:w-[40vw] lg:w-[34vw]">
+            <div className="flex h-[calc(var(--ah)*58)] w-[78vw] shrink-0 flex-col justify-between pr-4 md:w-[40vw] lg:w-[34vw]">
               <span className="label tracking-[0.24em] lg:text-xs">
                 {eyebrow} — {pad(n)}
               </span>
@@ -199,7 +199,7 @@ export function CtaPanel({ dark = false, id = 'reservar', eyebrow, aside, title,
   const scale = useTransform(scrollYProgress, [0, 1], [0.88, 1])
   const text = `${marquee} — `
   return (
-    <section id={id} ref={ref} className={`relative z-20 h-svh w-full p-3 md:p-5 lg:p-8 ${tone(dark)}`}>
+    <section id={id} ref={ref} className={`relative z-20 h-[calc(100svh-var(--nav-h))] w-full p-3 md:p-5 lg:p-8 ${tone(dark)}`}>
       <motion.div
         style={{ scale }}
         className={`relative flex h-full w-full flex-col justify-between overflow-hidden rounded-[28px] p-5 md:rounded-[36px] md:p-8 lg:p-10 ${
@@ -374,7 +374,7 @@ export function WideImage({ src, alt, className = '' }) {
   })
   return (
     <div ref={ref} className={`px-6 md:px-10 ${className}`}>
-      <motion.div style={{ clipPath: clip }} className="h-[52svh] overflow-hidden lg:h-[92svh]">
+      <motion.div style={{ clipPath: clip }} className="h-[calc(var(--ah)*52)] overflow-hidden lg:h-[calc(var(--ah)*92)]">
         <motion.div style={{ y }} className="h-[118%] w-full -translate-y-[8%]">
           <Img src={src} alt={alt} className="h-full w-full" />
         </motion.div>

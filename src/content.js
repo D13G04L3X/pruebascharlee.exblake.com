@@ -18,7 +18,8 @@ export const nav = [
 export const hero = {
   image: img('hero'),
   labels: ['Hotel de diseño', 'Parque Lleras', 'Medellín', 'Explorar'],
-  headline: ['Medellín,', 'elevada.'],
+  // Propósito de marca (manual, 1.8 “We exist to”)
+  headline: ['Despierta el Charlee', 'que hay en ti.'],
   tagline: ['Un hotel es más que su edificio.', 'Es cómo la ciudad entra en él.'],
   ctas: [
     { label: 'Explorar el hotel', href: '#hotel' },
@@ -124,7 +125,8 @@ export const rooftop = {
 }
 
 export const footer = {
-  tagline: 'Medellín, elevada.',
+  // Frase de marca (manual, 2.4 Elementos complementarios)
+  tagline: 'Todo lo que imaginas, pero mejor.',
   sub: 'Arte, diseño y hospitalidad frente al Parque Lleras.',
   explore: [
     { label: 'Habitaciones', href: '/habitaciones' },
@@ -142,6 +144,16 @@ export const footer = {
   ],
   address: 'Calle 9A #37-16 · El Poblado, Medellín',
   status: 'Reservas abiertas',
+  image: img('rooftop'), // foto de fondo del bloque superior del footer
+  // Reemplaza los "#" por las páginas legales reales
+  legal: [
+    { label: 'Términos y condiciones', href: '#' },
+    { label: 'Política de privacidad', href: '#' },
+    { label: 'Tratamiento de datos', href: '#' },
+    { label: 'Política de cookies', href: '#' },
+  ],
+  rights: 'Todos los derechos reservados.',
+  credit: { prefix: 'Diseño y desarrollo por', label: 'ExBlake', href: 'https://exblake.com' },
 }
 
 // ───────────────────────── Habitaciones ─────────────────────────

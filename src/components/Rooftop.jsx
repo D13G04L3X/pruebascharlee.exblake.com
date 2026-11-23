@@ -25,7 +25,7 @@ export default function Rooftop() {
 
   return (
     <section id="rooftop" ref={pin} className="relative z-30 h-[300vh] w-full bg-bone text-white">
-      <div className="sticky top-0 h-svh w-full overflow-hidden bg-bone">
+      <div className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full overflow-hidden bg-bone">
         <motion.div className="absolute overflow-hidden" style={box}>
           <motion.div className="h-full w-full will-change-transform" style={{ scale }}>
             <Img src={rooftop.image} alt={rooftop.alt} dark className="h-full w-full" />

@@ -31,7 +31,7 @@ function Transition() {
         <Cloud color="#ffffff" style={cloudA} className="top-[25%] lg:top-0" />
         <Cloud color="#ffffff" style={cloudB} className="top-[20%] lg:top-[8%]" />
       </div>
-      <div className="sticky top-0 z-40 flex h-svh w-full items-center justify-center px-6">
+      <div className="sticky top-(--nav-h) z-40 flex h-[calc(100svh-var(--nav-h))] w-full items-center justify-center px-6">
         <motion.div className="flex flex-col items-center text-center" style={{ opacity: copyOpacity, y: copyY }}>
           <p className="label mb-4 tracking-[0.24em] lg:mb-5 lg:text-xs">{suitesIntro.eyebrow}</p>
           <h2 className="display text-[clamp(1.6rem,6.2vw,6rem)]">
@@ -103,7 +103,7 @@ function Rooms() {
     return `inset(${y * k}% ${x * k}% ${y * k}% ${x * k}% round ${28 * k}px)`
   })
   const openScale = useTransform(vh, (v) => lerp(1.3, 1, seg(v, 0, 100, ez.p2io)))
-  const bg = useTransform(vh, [60, 100], ['#ffffff', '#ede6d6'])
+  const bg = useTransform(vh, [60, 100], ['#ffffff', '#f7f6e9'])
 
   const preset = desktop ? PRESET.desktop : PRESET.mobile
   const s = Math.max(0, step)
@@ -111,7 +111,7 @@ function Rooms() {
 
   return (
     <section id="suites" ref={pin} className="relative z-30 w-full bg-bone text-ink" style={{ height: `${scrollLen + 100}vh` }}>
-      <motion.div className="sticky top-0 h-svh w-full overflow-hidden" style={{ backgroundColor: bg }}>
+      <motion.div className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full overflow-hidden" style={{ backgroundColor: bg }}>
         {items.map((it, i) => {
           const role = roleOf(i, s)
           const front = role === 'hero' || role === 'main'

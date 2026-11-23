@@ -9,8 +9,10 @@ import { EASE, Img, Lines, Roll, pad } from '../components/ui'
    encima; al pasar el cursor se reproduce el video de la habitación. */
 function RoomCard({ room, i, total }) {
   const ref = useRef(null)
+  const pause = useRef(null)
   const video = useRef(null)
-  const { scrollYProgress: leave } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  // La tarjeta se queda quieta mientras pasa la pausa; se encoge solo cuando la siguiente empieza a subir.
+  const { scrollYProgress: leave } = useScroll({ target: pause, offset: ['end end', 'end start'] })
   const { scrollYProgress: enter } = useScroll({ target: ref, offset: ['start end', 'start start'] })
   const last = i === total - 1
   const scale = useTransform(leave, [0, 1], [1, last ? 1 : 0.9])
@@ -21,7 +23,8 @@ function RoomCard({ room, i, total }) {
   const stop = () => video.current?.pause()
 
   return (
-    <div ref={ref} className="sticky top-0 h-svh w-full p-3 md:p-5 lg:p-8" style={{ zIndex: i + 1 }}>
+    <>
+    <div ref={ref} className="sticky top-(--nav-h) h-[calc(100svh-var(--nav-h))] w-full p-3 md:p-5 lg:p-8" style={{ zIndex: i + 1 }}>
       <motion.div style={{ scale }} className="h-full w-full origin-top will-change-transform">
         <Link
           to={`/habitaciones/${room.slug}`}
@@ -79,6 +82,9 @@ function RoomCard({ room, i, total }) {
         </Link>
       </motion.div>
     </div>
+    {/* Pausa: tramo de scroll en el que la habitación queda fija para leerla con calma */}
+    <div ref={pause} aria-hidden className={last ? 'h-0' : 'h-[75svh]'} />
+    </>
   )
 }
 
@@ -99,7 +105,7 @@ export default function Rooms({ ready }) {
           lines={roomsPage.title}
           show={ready}
           delay={0.1}
-          className="text-[clamp(2.3rem,10.5vw,5.5rem)] font-medium leading-[0.98] tracking-[-0.05em] lg:text-[8.2vw]"
+          className="text-[clamp(2.3rem,10.5vw,5.5rem)] text-sage-deep font-medium leading-[0.98] tracking-[-0.05em] lg:text-[8.2vw]"
         />
         <motion.div
           className="mt-8 flex flex-col gap-4 border-t border-ink/20 pt-5 md:flex-row md:items-start md:justify-between lg:mt-12"
