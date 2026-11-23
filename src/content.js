@@ -6,7 +6,7 @@ export const brand = 'The Charlee'
 
 export const nav = [
   // image: foto que acompaña al enlace en el menú a pantalla completa
-  { label: 'Habitaciones', href: '/habitaciones', image: img('rooms/suite-charlee-1') },
+  { label: 'Habitaciones', href: '/habitaciones', image: img('rooms/spice-bedrooms-1') },
   { label: 'Restaurante', href: '/restaurante', image: img('pages/resto-1') },
   { label: 'Rooftop', href: '/rooftop', image: img('pages/envy-1') },
   { label: 'Experiencias', href: '/experiencias', image: img('pages/exp-2') },
@@ -203,12 +203,13 @@ export const roomNotes = {
 }
 
 // Una página por habitación en /habitaciones/<slug>.
-// media: nombre de los archivos en /public/videos/<media>.mp4 y /public/images/rooms/<media>-N.jpg (la primera es la portada).
-const room = (slug, media, count, data) => ({
+// Fotos: /public/images/rooms/<slug>-1.jpg … <slug>-<count>.jpg (la -1 es la portada).
+// video: nombre del archivo en /public/videos/<video>.mp4 (cuando subas los nuevos, pon el slug: king, doble…).
+const room = (slug, video, count, data) => ({
   slug,
-  video: `/videos/${media}.mp4`,
+  video: `/videos/${video}.mp4`,
   images: Array.from({ length: count }, (_, i) => ({
-    src: `/images/rooms/${media}-${i + 1}.jpg`,
+    src: `/images/rooms/${slug}-${i + 1}.jpg`,
     alt: `${data.name}, foto ${i + 1}`,
   })),
   ...data,
@@ -223,7 +224,7 @@ const specs = (size, beds) => [
 ]
 
 export const rooms = [
-  room('king', 'deluxe', 5, {
+  room('king', 'deluxe', 4, {
     name: 'King',
     tagline: ['Una habitación para', 'una estancia prestigiosa.'],
     meta: ['45 m²', '2 huéspedes', '1 cama', '1 baño', 'WiFi gratis', 'Aire acondicionado', 'Maxi bar'],
@@ -232,7 +233,7 @@ export const rooms = [
       'En el Hotel The Charlee en Medellín, situado en el exclusivo barrio El Poblado, cerca de Provenza, descubre la comodidad suprema en nuestras Habitaciones King. Con 45 m² de espacio, estas habitaciones están entre las más amplias en Medellín. Cada detalle ha sido cuidadosamente seleccionado, desde la decoración contemporánea hasta las comodidades como internet de alta velocidad y televisión de pantalla plana, garantizando una estancia inigualable. Además, todas nuestras habitaciones cuentan con un balcón privado para que disfrutes de impresionantes vistas urbanas.',
     specs: specs('45 m²', '1'),
   }),
-  room('doble', 'junior-suite', 5, {
+  room('doble', 'junior-suite', 4, {
     name: 'Doble',
     tagline: ['Una estancia diseñada', 'para compartir momentos.'],
     meta: ['45 m²', '2 huéspedes', '2 camas', '1 baño', 'WiFi gratis', 'Aire acondicionado', 'Maxi bar'],
@@ -241,7 +242,7 @@ export const rooms = [
       'Con una opción de dos camas en un espacio de 45 m², nuestras Habitaciones Dobles ofrecen una experiencia inigualable en el exclusivo barrio El Poblado, cerca de Provenza. Cada detalle, desde la decoración moderna hasta las comodidades como internet de alta velocidad y televisión de pantalla plana, ha sido cuidadosamente diseñado para garantizar tu confort. Además, todas nuestras habitaciones cuentan con un balcón privado para disfrutar de las vistas de Medellín.',
     specs: specs('45 m²', '2'),
   }),
-  room('spice-bedrooms', 'suite-charlee', 5, {
+  room('spice-bedrooms', 'suite-charlee', 4, {
     name: 'Spice Bedrooms',
     tagline: ['Un espacio que fusiona', 'sabor y buen gusto.'],
     meta: ['54 m²', '2 huéspedes', '1 cama', '1 baño', 'WiFi gratis', 'Aire acondicionado', 'Maxi bar'],
@@ -250,7 +251,7 @@ export const rooms = [
       'En el Hotel The Charlee en Medellín, situado en el exclusivo barrio El Poblado, cerca de Provenza, sumérgete en una experiencia culinaria única en nuestras Habitaciones Spice. Estas habitaciones de 54 m² cuentan con un exclusivo teppanyaki grill privado, ofreciendo un ambiente de sofisticación y entretenimiento. Disfruta de la cocina japonesa preparada por un chef experto en tu propio espacio privado. Con balcón y un diseño que invita al relax, esta es una experiencia que no te puedes perder.',
     specs: specs('54 m²', '1'),
   }),
-  room('acqua', 'junior-suite', 5, {
+  room('acqua', 'junior-suite', 4, {
     name: 'Acqua',
     tagline: ['Una estancia llena de armonía,', 'calma y relajación.'],
     meta: ['60 m²', '2 huéspedes', '1 cama', '1 baño', 'WiFi gratis', 'Aire acondicionado', 'Maxi bar'],
@@ -259,7 +260,7 @@ export const rooms = [
       'En el Hotel The Charlee en Medellín, situado en el exclusivo barrio El Poblado, cerca de Provenza, relájate y revitaliza tus sentidos en nuestras Habitaciones Acqua. Con 60 m² de espacio, estas habitaciones, entre las más amplias de Medellín, te ofrecen un jacuzzi de hidromasaje con cromoterapia para una experiencia de bienestar total. Cada habitación cuenta con un balcón privado y ha sido diseñada para que disfrutes de una estancia en total armonía con tu entorno.',
     specs: specs('60 m²', '1'),
   }),
-  room('envy', 'penthouse', 6, {
+  room('envy', 'penthouse', 4, {
     name: 'Envy',
     tagline: ['Una estancia creada para', 'despertar tus sentidos.'],
     meta: ['100 m²', '2 huéspedes', '1 cama', '1 baño', 'WiFi gratis', 'Aire acondicionado', 'Maxi bar'],

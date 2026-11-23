@@ -17,7 +17,8 @@ const existentes = new Set(listar('public'))
 const usadas = new Map() // ruta -> de dónde sale
 
 // 1) Rutas escritas tal cual en el código (src/ e index.html)
-const fuentes = ['index.html', ...listar('src').map((f) => 'src' + f)]
+// src/imagenes.json se excluye: es un índice generado (npm run imagenes) y puede estar desactualizado
+const fuentes = ['index.html', ...listar('src').map((f) => 'src' + f).filter((f) => f !== 'src/imagenes.json')]
 for (const f of fuentes) {
   for (const m of readFileSync(f, 'utf8').matchAll(/["'`](\/(?:images|videos)\/[^"'`$]+)["'`]/g)) usadas.set(m[1], f)
 }
