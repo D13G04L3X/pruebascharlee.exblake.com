@@ -9,8 +9,8 @@ Qué hace GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deplo
 
 1. `npm ci`: instala exactamente lo de `package-lock.json`. Si agregas una librería, corre `npm install` y sube también el `package-lock.json`.
 2. `npm run revisar`: comprueba que cada imagen y video que usa el código exista en `public/` **con el nombre exacto**. En Windows `Deluxe-1.jpg` y `deluxe-1.jpg` son lo mismo; en el servidor no, y la foto sale rota. Córrelo tú antes de hacer push.
-3. Recupera de la caché de GitHub las versiones optimizadas de las fotos (ver [Imágenes optimizadas](#imágenes-optimizadas-avif--webp)).
-4. `npm run build`: primero optimiza las fotos nuevas o cambiadas (`prebuild`) y luego genera el sitio en `dist/` (Vite). `dist/` no se sube al repo.
+3. `npm run imagenes`: recupera de la caché de GitHub las versiones optimizadas de las fotos y procesa solo las nuevas o cambiadas (ver [Imágenes optimizadas](#imágenes-optimizadas-avif--webp)). Si se corta, lo avanzado se guarda igual y la siguiente publicación sigue desde ahí.
+4. `npm run build`: genera el sitio en `dist/` (Vite). `dist/` no se sube al repo.
 5. Revisa que `dist/` esté completo (portada, JS, CSS, `robots.txt`) **antes** de subir nada.
 6. Sube `dist/` al VPS por SSH (`/home/pruebascharlee/htdocs/pruebascharlee.exblake.com`). Lo que ya no está en `dist/` se borra del servidor: no subas archivos a mano.
 7. Comprueba la portada, una ruta interna (`/habitaciones`), el JS y el CSS como los vería un visitante.
@@ -18,6 +18,7 @@ Qué hace GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deplo
 Reglas para no romperlo:
 
 - `index.html` (raíz) es la plantilla de la app; `public/` solo guarda archivos que se copian tal cual (imágenes, videos, `robots.txt`).
+- **Fotos de máximo ~2400 px de ancho y pocos MB.** La web nunca usa más; una foto de 20 MB (hay varias) solo hace más lento el repo y cada publicación. `npm run imagenes` avisa cuáles pasan de 8 MB.
 - Si **reemplazas una foto o video**, súbelo con el mismo nombre solo si no importa que algunos visitantes vean el anterior hasta 1 hora; si importa, cámbiale el nombre y la ruta en `src/content.js`.
 - Para probar antes de publicar: `npm run build` y luego `npm run preview`.
 - También se puede publicar sin cambios: **Actions → Publicar en el VPS → Run workflow**.
@@ -94,7 +95,7 @@ En el código **siempre se referencia la ruta del original** (`/images/...jpg`),
 | [`src/components/Lightbox.jsx`](src/components/Lightbox.jsx) | Foto ampliada y miniaturas con `<Picture>`; precarga la foto anterior/siguiente con el mismo `srcset` AVIF para que quede en caché. |
 | [`src/components/Preloader.jsx`](src/components/Preloader.jsx) | Las 5 fotos de la pantalla de carga usan `<Picture>`. |
 | [`package.json`](package.json) | `imagenes` corre el script; `predev` y `prebuild` lo ejecutan solos. `sharp` está en `devDependencies`. |
-| [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) | Paso **Recuperar imágenes optimizadas** (`actions/cache`) antes del build. |
+| [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) | Pasos **Recuperar**, **Optimizar** y **Guardar imágenes optimizadas** antes del build. |
 | [`.gitignore`](.gitignore) | Ignora `public/_img/`, `src/imagenes.json` y `.cache/`. |
 
 ### Comandos
@@ -112,7 +113,7 @@ Configuración (arriba del archivo):
 ```js
 const ANCHOS = [480, 960, 1600, 2400]           // anchos que se generan
 const FORMATOS = {
-  avif: (img) => img.avif({ quality: 50, effort: 4 }),  // ~50 % menos que JPG
+  avif: (img) => img.avif({ quality: 50, effort: 2 }),  // ~50 % menos que JPG; effort 2: ~7× más rápido que 4 y ~10 % más pesado
   webp: (img) => img.webp({ quality: 78 }),             // respaldo, ~30 % menos que JPG
 }
 ```
@@ -121,8 +122,8 @@ Para cada foto:
 
 1. **Lee las dimensiones** con `sharp(...).metadata()`, respetando la orientación EXIF (las fotos de celular giradas se corrigen con `.rotate()` al generar).
 2. **Decide los anchos sin agrandar nunca:** usa los de `ANCHOS` menores que el ancho original y, si el original mide 2400 px o menos, agrega también el ancho original. Ejemplo: un JPG de 1800 px genera `480, 960, 1600, 1800`; uno de 4000 px genera `480, 960, 1600, 2400`.
-3. **Calcula una huella SHA-1 del contenido del archivo.** Si coincide con la guardada en `.cache/imagenes-huellas.json` y las versiones ya existen, no hace nada. Se compara el **contenido** y no la fecha a propósito: en GitHub Actions el `checkout` deja todos los archivos con fecha nueva, y con fechas se regeneraría todo en cada publicación.
-4. **Genera** `public/_img/<ruta>-<ancho>.<avif|webp>` para cada ancho y formato.
+3. **Calcula una huella SHA-1 del contenido del archivo y de la configuración (`ANCHOS`, `FORMATOS`).** Si coincide con la guardada en `.cache/imagenes-huellas.json` y las versiones ya existen, no hace nada. Se compara el **contenido** y no la fecha a propósito: en GitHub Actions el `checkout` deja todos los archivos con fecha nueva, y con fechas se regeneraría todo en cada publicación.
+4. **Genera** `public/_img/<ruta>-<ancho>.<avif|webp>` para cada ancho y formato. La foto se abre **una sola vez** (reducida a 2400 px) y todas sus versiones salen de esa copia; se procesan varias fotos a la vez. El avance se guarda después de cada foto.
 5. **Registra** la foto en el índice.
 
 Al final **borra de `public/_img/` las versiones que ya no corresponden** a ninguna foto (renombradas o eliminadas), guarda las huellas y escribe `src/imagenes.json`. Imprime algo como:
@@ -131,7 +132,7 @@ Al final **borra de `public/_img/` las versiones que ya no corresponden** a ning
 Imágenes: 85 fotos · 8 versiones nuevas · 660 reutilizadas (3.1s)
 ```
 
-Tiempos de referencia (Windows, 85 fotos): **~4 min** la primera vez (668 versiones; AVIF es lo lento), **~0,2 s** cuando no hay cambios, unos segundos por cada foto nueva.
+Tiempos de referencia (Windows, 5 núcleos, 84 fotos): **~2 min** la primera vez (660 versiones; AVIF es lo lento), **~0,2 s** cuando no hay cambios, unos segundos por cada foto nueva.
 
 Formato de `src/imagenes.json` (clave = ruta pública del original):
 
@@ -172,23 +173,25 @@ Si una foto **no está en el índice** (por ejemplo, la agregaste y no corriste 
 
 ### En GitHub Actions
 
-`npm ci` instala `sharp` con su binario para Linux (está en `package-lock.json`: `@img/sharp-linux-x64`). El paso **Recuperar imágenes optimizadas** restaura `public/_img/` y `.cache/imagenes-huellas.json` de la caché de GitHub:
+`npm ci` instala `sharp` con su binario para Linux (está en `package-lock.json`: `@img/sharp-linux-x64`). Luego, tres pasos:
 
-- **Clave:** `imagenes-<hash de public/images/** y del script>`. Si no cambió ninguna foto ni el script, se restaura todo y el build no regenera nada.
-- **`restore-keys: imagenes-`:** si cambiaron algunas fotos, se restaura la caché anterior más parecida y el script solo procesa las nuevas o cambiadas (gracias a las huellas).
-- Sin caché (primera vez, o si GitHub la borró por no usarse en 7 días) el build tarda unos minutos más, pero funciona igual.
+1. **Recuperar imágenes optimizadas** (`actions/cache/restore`): restaura `public/_img/` y `.cache/imagenes-huellas.json` de la publicación más reciente.
+2. **Optimizar imágenes** (`npm run imagenes`, límite de 20 min): solo procesa lo nuevo o cambiado, gracias a las huellas.
+3. **Guardar imágenes optimizadas** (`actions/cache/save`, con `if: always()`): guarda el resultado **aunque el paso anterior haya fallado o se haya cortado por tiempo**. Así nunca se pierde lo avanzado: la siguiente publicación sigue desde ahí. (Antes, si se cortaba, no se guardaba nada y cada intento empezaba de cero: por eso fallaron las publicaciones #9–#11.)
+
+Después, `npm run build --ignore-scripts` genera el sitio sin volver a revisar las fotos. Sin caché (primera vez, o si GitHub la borró por no usarse en 7 días) tarda unos minutos más, pero funciona igual.
 
 Las versiones quedan dentro de `dist/_img/` (Vite copia `public/` tal cual) y se suben al servidor junto con el resto del sitio.
 
 ### Tareas comunes
 
 **Agregar o reemplazar fotos**
-1. Pon el JPG en `public/images/...` con nombre en minúsculas, sin espacios ni tildes (`king-3.jpg`). Exporta en buena calidad: la compresión la hace el script.
+1. Pon el JPG en `public/images/...` con nombre en minúsculas, sin espacios ni tildes (`king-3.jpg`). Exporta en buena calidad pero **a ~2400 px de ancho** (no la foto de cámara de 6000 px y 20 MB): la compresión la hace el script.
 2. Si es una foto nueva, agrégala en [`src/content.js`](src/content.js) (para las habitaciones, la cantidad de fotos es el tercer argumento de `room(...)`).
 3. `npm run revisar` (que exista con el nombre exacto) y `npm run dev` o `npm run imagenes`.
 4. Haz commit **solo de `public/images/...`** y del código. `public/_img/` no se sube.
 
-**Cambiar anchos o calidad:** edita `ANCHOS` o `FORMATOS` en el script. Las huellas no detectan cambios de configuración, así que borra lo generado para regenerar todo: `rm -rf public/_img .cache` y `npm run imagenes`. En GitHub la clave de caché incluye el hash del script, así que se regenera sola.
+**Cambiar anchos o calidad:** edita `ANCHOS` o `FORMATOS` en el script. La huella incluye esa configuración, así que la próxima vez se regenera todo solo (en tu PC y en GitHub). Con todas las fotos tarda unos minutos.
 
 **Ver qué versión cargó una foto:** DevTools → Elements → selecciona el `<img>` → en la consola `$0.currentSrc`. O en la pestaña Network, filtra por `_img`.
 
@@ -206,5 +209,5 @@ Las versiones quedan dentro de `dist/_img/` (Vite copia `public/` tal cual) y se
 | La foto nueva se ve pero pesa mucho (carga el `.jpg`) | No está en el índice: corre `npm run imagenes` y recarga. |
 | Bloque de color con la ruta `public/...` en lugar de la foto | El original no existe con ese nombre exacto. `npm run revisar` dice cuál. |
 | `npm ci` falla con un error de `sharp` en Actions | Al agregar dependencias desde Windows, regenera el lock con `npm install` y súbelo; debe incluir `@img/sharp-linux-x64`. |
-| Cambié la calidad y no pasa nada | Las huellas solo miran el contenido de las fotos: borra `public/_img` y `.cache` y vuelve a correr. |
+| La publicación sale en rojo en **Optimizar imágenes** por tiempo | Muchas fotos nuevas o muy pesadas de una vez. Lo avanzado quedó guardado: vuelve a publicar (**Run workflow**) y sigue desde ahí. Para evitarlo, reduce las fotos a ~2400 px antes de subirlas. |
 | Reemplacé una foto con el mismo nombre y algunos ven la vieja | Caché de 1 hora del servidor (ver Vhost). Si importa, cambia el nombre del archivo. |

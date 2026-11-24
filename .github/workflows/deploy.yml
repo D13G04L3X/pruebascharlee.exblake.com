@@ -20,7 +20,7 @@ jobs:
     # Este código también se sube a ExBlake/The-Charlee-Hotel-WebSite; allí NO debe publicar.
     if: github.repository == 'D13G04L3X/pruebascharlee.exblake.com'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40 # tope de seguridad; cada paso lento tiene su propio límite
     steps:
       - uses: actions/checkout@v4
 
@@ -37,20 +37,38 @@ jobs:
       - name: Revisar imágenes y videos
         run: npm run revisar
 
-      # Versiones AVIF/WebP de las fotos: se guardan entre publicaciones para no regenerarlas todas cada vez
-      # (el build solo procesa las fotos nuevas o cambiadas)
+      # Versiones AVIF/WebP de las fotos: se guardan entre publicaciones para no regenerarlas todas cada vez.
+      # Se recupera la más reciente; el script solo procesa las fotos nuevas o cambiadas.
       - name: Recuperar imágenes optimizadas
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             public/_img
             .cache/imagenes-huellas.json
-          key: imagenes-${{ hashFiles('public/images/**', 'scripts/optimizar-imagenes.mjs') }}
+          key: imagenes-${{ github.run_id }}
           restore-keys: imagenes-
 
-      # "npm run build" primero optimiza las imágenes (prebuild) y luego genera el sitio con Vite
+      # Paso aparte y con límite propio: si se corta, lo ya optimizado se guarda igual (paso siguiente)
+      # y la próxima publicación sigue desde ahí en vez de empezar de cero.
+      - name: Optimizar imágenes
+        id: imagenes
+        timeout-minutes: 20
+        run: npm run imagenes
+
+      # "always()": se guarda aunque el paso anterior haya fallado o se haya cortado por tiempo
+      - name: Guardar imágenes optimizadas
+        if: always() && steps.imagenes.outcome != 'skipped'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            public/_img
+            .cache/imagenes-huellas.json
+          key: imagenes-${{ github.run_id }}-${{ github.run_attempt }}
+
+      # --ignore-scripts: las imágenes ya se optimizaron arriba (si no, "prebuild" las revisaría otra vez)
       - name: Generar el sitio
-        run: npm run build
+        timeout-minutes: 5
+        run: npm run build --ignore-scripts
 
       # Nada se sube si el build no dejó un sitio completo: rsync --delete borraría el sitio que funciona
       - name: Revisar el sitio generado antes de subirlo
@@ -80,6 +98,7 @@ jobs:
       # --delete-after borra del servidor lo que ya no existe en el sitio; --delay-updates cambia todo al final, de golpe.
       # --chmod: permisos de lectura correctos aunque el archivo venga raro desde Windows.
       - name: Subir al servidor
+        timeout-minutes: 10
         run: |
           rsync -az --delete-after --delay-updates --chmod=D755,F644 \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o ConnectTimeout=20" \
